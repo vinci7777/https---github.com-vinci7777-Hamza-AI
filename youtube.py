@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from config import YOUTUBE_API_KEY
 import requests
 import json
+import os
 import sqlite3
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
@@ -14,23 +15,64 @@ def extract_video_id_from_url(url):
     return video_id
 
 def get_channel_videos(channel_id, youtube):
-    res = youtube.channels().list(id=channel_id, 
-                                  part='contentDetails').execute()
+    print("Gathering channel videos...")
 
+    # File to store the video list
+    file_path = 'channel_videos.json'
+
+    # Initialize existing_videos as an empty list
+    existing_videos = []
+
+    # Check if the file exists
+    if os.path.exists(file_path):
+        try:
+            # Try to load the existing video list from the file
+            with open(file_path, 'r') as file:
+                existing_videos = json.load(file)
+        except json.JSONDecodeError:
+            # Handle the case where the file is empty or contains invalid JSON
+            print("Error loading existing video list. Using an empty list instead.")
+
+    res = youtube.channels().list(id=channel_id, part='contentDetails').execute()
     uploads_playlist_id = res['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
     videos = []
     next_page_token = None
 
-    while 1:
+    while True:
         res = youtube.playlistItems().list(playlistId=uploads_playlist_id,
-                                       part='snippet',
-                                       pageToken=next_page_token).execute()
+                                           part='snippet',
+                                           pageToken=next_page_token).execute()
         videos += res['items']
         next_page_token = res.get('nextPageToken')
 
         if next_page_token is None:
-            break  
+            break
+
+    # Extract video IDs from the fetched videos
+    new_video_ids = set(video['snippet']['resourceId']['videoId'] for video in videos)
+    print(f"Number of videos in the list: {len(existing_videos)}")
+    print(f"Number of videos gathered from the channel: {len(new_video_ids)}")
+
+    # Check if the new video IDs are different from the existing ones
+    if new_video_ids == set(existing_videos):
+        print("Checking if there are any new videos...")
+        print("NOTHING NEW ADDED!")
+        print("Closing the gathering videos method.")
+        return []
+
+    print("Checking if there are any new videos...")
+    print("NEW VIDEOS FOUND and added to the list!")
+
+    # Update the existing video list with the new video IDs
+    existing_videos = list(new_video_ids)
+    print(f"Number of videos in the list: {len(existing_videos)}")
+
+    # Save the updated video list to the file
+    with open(file_path, 'w') as file:
+        json.dump(existing_videos, file)
+
+    print("Closing the gathering videos method.")
     return videos
 
 def get_video_id(video_data):

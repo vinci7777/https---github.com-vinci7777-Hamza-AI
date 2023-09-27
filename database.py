@@ -81,14 +81,14 @@ def check_and_initialize_database():
         )
         conn.autocommit = True
         cursor = conn.cursor()
-        print('Connected to the PostgreSQL database')
+        print('Connected to the PostgreSQL database.')
     except psycopg2.OperationalError as e:
         # If the database doesn't exist, create it and initialize tables
         if "does not exist" in str(e):
             try:
                 create_database_if_not_exists()
                 initialize_database()
-                print('Database created and initialized successfully')
+                print('Database created and initialized successfully!')
             except Exception as ex:
                 print('Error:', ex)
         else:
