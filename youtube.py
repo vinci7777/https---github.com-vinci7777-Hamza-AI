@@ -1,4 +1,5 @@
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 from googleapiclient.discovery import build
 from config import YOUTUBE_API_KEY
 import requests
@@ -129,7 +130,6 @@ def get_channel_videos_urls(channel_id, youtube):
     video_urls = [get_video_url(video) for video in videos]
     return video_urls
 
-#to jest dobrze tylko ze arugmentem powinien byc video id a nie url
 def get_video_data_by_url(video_url):
     video_id = extract_video_id_from_url(video_url)
     url = 'https://www.googleapis.com/youtube/v3/videos?part=id%2C+snippet&id=' + video_id + '&key=' + YOUTUBE_API_KEY
@@ -143,46 +143,23 @@ def get_video_data_by_url(video_url):
         description = snippet.get('description')
         id = snippet.get('id')
 
-        print(f'Title: {title}')
-        print(f'Description: {description}')
-        print(f'ID: {id}')
-
     return data
     
-# Function to fetch and save a YouTube video's transcript
 def get_video_transcription(video_url):
-    # Extract video_id from the URL
-    video_id = video_url.split('v=')[1]
-    # Fetch the transcript
-    transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    return transcript
+    try:
+        # Extract video_id from the URL
+        video_id = video_url.split('v=')[1]
+        
+        # Fetch the transcript
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+        
+        # Check if the transcript is empty or contains no English subtitles
+        if not transcript:
+            return []
+        
+        return transcript
+    except (TranscriptsDisabled, NoTranscriptFound):
+        return []
 
-#funkcjonalnosc zapisywania transkrypcji wideo do bazy danych
 
-    # # Connect to the database
-    # conn = sqlite3.connect('youtube_transcripts.db')
-    # cursor = conn.cursor()
 
-    # # Insert video details into the Video table
-    # cursor.execute
-    # ('''
-    # INSERT OR IGNORE INTO Video (video_id, title, url)
-    # VALUES (?, ?, ?, ?, ?)
-    # ''', 
-    #     (
-    #     video_id,
-    #     title,
-    #     video_url,
-    #     )
-    # )
-
-    #     # Insert transcript data into the Transcript table
-    # for entry in transcript:
-    #     cursor.execute('''
-    #         INSERT INTO Transcript (video_id, timestamp, text)
-    #         VALUES (?, ?, ?)
-    #     ''', (video_id, entry['start'], entry['text']))
-
-    # # Commit changes and close the connection
-    # conn.commit()
-    # conn.close()

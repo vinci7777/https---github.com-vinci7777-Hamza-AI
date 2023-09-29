@@ -94,3 +94,5 @@ def check_and_initialize_database():
         else:
             print('Error:', e)
 
+
+
