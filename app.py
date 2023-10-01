@@ -20,7 +20,7 @@ def job():
         logging.error(f"Error in job: {str(e)}")
 
 # Define the time you want to run the job (e.g., 10:00 AM)
-desired_time = "19:10"
+desired_time = "19:13"
 
 # Schedule the job to run at the desired time
 schedule.every().day.at(desired_time).do(job)
