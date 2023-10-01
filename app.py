@@ -11,12 +11,15 @@ def job():
     videos = get_channel_videos() 
     if videos:
         save_missing_videos_to_database()
-        print("Addidng missing videos to database...")
+        print("Adding missing videos to the database...")
     else:
         print("No new videos found!")
 
-# Run the scheduler in a loop
-schedule.every().day.do(job)
+# Define the time you want to run the job (e.g., 10:00 AM)
+desired_time = "16:45"
+
+# Schedule the job to run at the desired time
+schedule.every().day.at(desired_time).do(job)
 
 # Run the scheduler in a loop
 while True:
