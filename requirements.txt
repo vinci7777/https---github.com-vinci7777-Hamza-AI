@@ -1,0 +1,4 @@
+psycopg2==2.9.7
+# jsonschema==4.19.0
+# jsonschema-specifications==2023.7.1
+# youtube-transcript-api==0.6.1

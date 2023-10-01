@@ -1,7 +1,7 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 from googleapiclient.discovery import build
-from config import YOUTUBE_API_KEY
+from config import YOUTUBE_API_KEY, HAMZA_CHANNEL_ID
 import requests
 import json
 import os
@@ -9,13 +9,16 @@ import sqlite3
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
 
+youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
+channel_id = HAMZA_CHANNEL_ID
+
 def extract_video_id_from_url(url):
     url_data = urlparse.urlparse(url)
     query = urlparse.parse_qs(url_data.query)
     video_id = query["v"][0]
     return video_id
 
-def get_channel_videos(channel_id, youtube):
+def get_channel_videos():
     print("Gathering channel videos...")
 
     # File to store the video list
@@ -120,12 +123,12 @@ def get_video_upload_date_by_url(video_url):
         return items[0].get('snippet', {}).get('publishedAt')
     return None
 
-def get_channel_videos_titles(channel_id, youtube):
+def get_channel_videos_titles():
     videos = get_channel_videos(channel_id, youtube)
     video_titles = [get_video_title(video) for video in videos]
     return video_titles
 
-def get_channel_videos_urls(channel_id, youtube):
+def get_channel_videos_urls():
     videos = get_channel_videos(channel_id, youtube)
     video_urls = [get_video_url(video) for video in videos]
     return video_urls
