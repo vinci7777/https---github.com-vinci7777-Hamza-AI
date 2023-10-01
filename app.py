@@ -2,6 +2,9 @@ from helper import save_missing_videos_to_database
 from youtube import get_channel_videos
 import schedule
 import time
+import streamlit as st
+
+st.title('Hamza-AI')
 
 def job():
     videos = get_channel_videos() 
